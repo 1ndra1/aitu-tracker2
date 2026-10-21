@@ -47,7 +47,13 @@
         <button class="btn btn-outline" onclick="changeDate(1)">След. &rarr;</button>
       </div>
 
-      <div class="task-list" id="taskList"></div>
+      <!-- Список задач c блоком по умолчанию для пустого состояния -->
+      <div class="task-list" id="taskList">
+        <div class="empty-state" style="text-align: center; padding: 20px 0;">
+          <img src="empty-state.svg" alt="No tasks found" width="480" height="360" style="max-width: 100%; height: auto; display: block; margin: 0 auto 10px;">
+          <p style="color: var(--text-muted, #64748b); font-size: 0.95rem;">На этот день задач нет. Добавьте новую задачу ниже.</p>
+        </div>
+      </div>
 
       <form class="task-form" onsubmit="addTask(event)">
         <input type="text" id="taskTitle" placeholder="Название задачи" required>
@@ -90,7 +96,7 @@
     </section>
   </main>
 
-  <!-- Сворачиваемый блок «Как это работает»: нажмите на заголовок, чтобы открыть/закрыть -->
+  <!-- Сворачиваемый блок «Как это работает» без тяжелой картинки -->
   <details class="panel help-panel" open>
     <summary><h2 id="helpTitle">Как это работает</h2></summary>
     <div class="help-content">
@@ -99,10 +105,6 @@
         <li>Отметьте задачу выполненной: появится всплывающее сообщение.</li>
         <li>Войдите в аккаунт, чтобы задачи и расписание сохранялись в облаке.</li>
       </ol>
-      <figure class="help-figure">
-        <img src="help-tasks-360.webp" alt="Help guide screenshot">
-        <figcaption>Вкладка «Задачи» на телефоне: дата сверху, список задач с отметками и крестиком для удаления.</figcaption>
-      </figure>
     </div>
   </details>
 </div>
