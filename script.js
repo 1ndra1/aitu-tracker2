@@ -179,7 +179,7 @@ function renderTasks() {
  let dailyTasks = tasks.filter(t => t.date === currentDate);
 
  if (dailyTasks.length === 0) {
- list.innerHTML = '<div class="empty-state"><img src="images/empty-state.svg" width="64" height="64" alt=""><p>На этот день задач нет. Добавьте новую задачу ниже.</p></div>';
+ list.innerHTML = '<div class="empty-state"><img src="empty-state.svg" width="64" height="64" alt=""><p>На этот день задач нет. Добавьте новую задачу ниже.</p></div>';
  return;
  }
 
