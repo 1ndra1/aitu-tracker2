@@ -19,7 +19,7 @@ let unsubscribeSchedule = null;
 let currentDate = getToday();
 let authMode = 'login';
 let toastTimer = null;
-
+const clickSound = new Audio('done.mp3');
 const daysOfWeek = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
 
 const defaultSchedule = [
@@ -211,7 +211,8 @@ function addTask(e) {
  let time = document.getElementById('taskTime').value;
 
  if (!title || !subject) return;
-
+ clickSound.currentTime = 0;
+  clickSound.play();
  let newTask = {
  id: Date.now().toString(),
  title: title,
@@ -309,7 +310,8 @@ function addScheduleClass(e) {
  let time = document.getElementById('schedTime').value.trim();
 
  if (!name || !room || !time) return;
-
+ clickSound.currentTime = 0;
+  clickSound.play();
  let dayObj = scheduleData.find(d => d.day === dayName);
  if (dayObj) {
  dayObj.classes.push({ time: time, name: name, room: room });
