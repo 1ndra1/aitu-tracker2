@@ -212,7 +212,9 @@ function addTask(e) {
 
  if (!title || !subject) return;
  clickSound.currentTime = 0;
-  clickSound.play();
+ clickSound.play();
+ document.getElementById('add-sound').play(); 
+ showToast("Added!");
  let newTask = {
  id: Date.now().toString(),
  title: title,
@@ -449,6 +451,18 @@ function showAuthError(error) {
  } else {
  showError('passBox', 'passError', 'Ошибка: ' + code);
  }
+}
+function showToast(message) {
+  let toast = document.getElementById("toast");
+  if (!toast) return;
+  
+  toast.textContent = message;
+  toast.classList.add("show");
+  
+  // Прячем уведомление через 3 секунды
+  setTimeout(function() {
+    toast.classList.remove("show");
+  }, 3000);
 }
 
 function logout() {
