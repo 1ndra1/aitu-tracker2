@@ -464,7 +464,6 @@ function showToast(message) {
   toast.textContent = message;
   toast.classList.add("show");
   
-  // Прячем уведомление через 3 секунды
   setTimeout(function() {
     toast.classList.remove("show");
   }, 3000);
