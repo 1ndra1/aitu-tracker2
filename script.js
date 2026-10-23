@@ -211,9 +211,14 @@ function addTask(e) {
  let time = document.getElementById('taskTime').value;
 
  if (!title || !subject) return;
- clickSound.currentTime = 0;
- clickSound.play();
- document.getElementById('add-sound').play(); 
+
+
+ let addSound = document.getElementById('add-sound');
+ if (addSound) {
+  addSound.currentTime = 0;
+  addSound.play().catch(err => console.log("Sound error:", err));
+ }
+
  showToast("Added!");
  let newTask = {
  id: Date.now().toString(),
