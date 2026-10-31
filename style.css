@@ -160,3 +160,123 @@ h3 { font-size: 1rem; margin-bottom: .75rem; }
   header { padding: .75rem 1rem; }
   .date-nav .btn { padding: .5rem .6rem; }
 }
+/* PROFILE */
+
+.profile-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.profile-heading h2 {
+    margin-bottom: .25rem;
+}
+
+.profile-subtitle {
+    color: var(--muted);
+    font-size: .9rem;
+}
+
+.profile-avatar {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--on-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.profile-user-card,
+.stat-card,
+.profile-chart-card {
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+}
+
+.profile-user-card {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-label,
+.stat-label {
+    color: var(--muted);
+    font-size: .85rem;
+    display: block;
+    margin-bottom: .35rem;
+}
+
+.profile-user-card h3,
+.profile-user-card p {
+    overflow-wrap: anywhere;
+}
+
+.profile-section-title {
+    margin-bottom: .8rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: .75rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card strong {
+    font-size: 1.8rem;
+    color: var(--heading);
+}
+
+.profile-chart-card {
+    padding: 1.25rem;
+}
+
+.chart-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.chart-heading h3 {
+    margin-bottom: .25rem;
+}
+
+#statsPeriod {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .6rem;
+    font-size: .9rem;
+}
+
+.profile-chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 280px;
+}
+
+@media (max-width: 600px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .chart-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .profile-chart-wrapper {
+        height: 240px;
+    }
+}
