@@ -817,4 +817,144 @@ function renderProfileChart() {
         }
     });
 }
+
+// POMODORO TIMER
+
+let pomodoroMode = 'work';
+let pomodoroInterval = null;
+let pomodoroRemaining = 25 * 60;
+let pomodoroSessions = Number(localStorage.getItem('pomodoroSessions')) || 0;
+
+let pomodoroDurations = {
+    work: 25,
+    short: 5,
+    long: 15
+};
+
+function updatePomodoroDisplay() {
+    const minutes = Math.floor(pomodoroRemaining / 60);
+    const seconds = pomodoroRemaining % 60;
+
+    document.getElementById('pomodoroTime').textContent =
+        String(minutes).padStart(2, '0') + ':' +
+        String(seconds).padStart(2, '0');
+
+    document.getElementById('pomodoroSessions').textContent =
+        pomodoroSessions;
+}
+
+function setPomodoroMode(mode) {
+    pausePomodoro();
+
+    pomodoroMode = mode;
+    pomodoroRemaining = pomodoroDurations[mode] * 60;
+
+    updatePomodoroDisplay();
+}
+
+function startPomodoro() {
+    if (pomodoroInterval !== null) return;
+
+    pomodoroInterval = setInterval(() => {
+        pomodoroRemaining--;
+
+        if (pomodoroRemaining <= 0) {
+            pausePomodoro();
+
+            if (pomodoroMode === 'work') {
+                pomodoroSessions++;
+                localStorage.setItem(
+                    'pomodoroSessions',
+                    pomodoroSessions
+                );
+            }
+
+            alert('Время вышло!');
+
+            updatePomodoroDisplay();
+            return;
+        }
+
+        updatePomodoroDisplay();
+    }, 1000);
+}
+
+function pausePomodoro() {
+    if (pomodoroInterval !== null) {
+        clearInterval(pomodoroInterval);
+        pomodoroInterval = null;
+    }
+}
+
+function resetPomodoro() {
+    pausePomodoro();
+    pomodoroRemaining = pomodoroDurations[pomodoroMode] * 60;
+    updatePomodoroDisplay();
+}
+
+function savePomodoroSettings() {
+    const work = Number(
+        document.getElementById('workDuration').value
+    );
+
+    const short = Number(
+        document.getElementById('shortDuration').value
+    );
+
+    const long = Number(
+        document.getElementById('longDuration').value
+    );
+
+    if (
+        !Number.isInteger(work) || work < 1 || work > 120 ||
+        !Number.isInteger(short) || short < 1 || short > 60 ||
+        !Number.isInteger(long) || long < 1 || long > 60
+    ) {
+        alert('Введи корректное время в указанных пределах.');
+        return;
+    }
+
+    pomodoroDurations = {
+        work: work,
+        short: short,
+        long: long
+    };
+
+    Object.keys(pomodoroDurations).forEach(mode => {
+        localStorage.setItem(
+            'pomodoro_' + mode,
+            pomodoroDurations[mode]
+        );
+    });
+
+    resetPomodoro();
+    alert('Настройки сохранены!');
+}
+
+function initPomodoro() {
+    ['work', 'short', 'long'].forEach(mode => {
+        const saved = Number(
+            localStorage.getItem('pomodoro_' + mode)
+        );
+
+        if (saved > 0) {
+            pomodoroDurations[mode] = saved;
+        }
+    });
+
+    document.getElementById('workDuration').value =
+        pomodoroDurations.work;
+
+    document.getElementById('shortDuration').value =
+        pomodoroDurations.short;
+
+    document.getElementById('longDuration').value =
+        pomodoroDurations.long;
+
+    pomodoroRemaining = pomodoroDurations.work * 60;
+    updatePomodoroDisplay();
+}
+
+initPomodoro();
+
 window.onload = init;
