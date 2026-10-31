@@ -145,7 +145,12 @@ function stopCloudSync() {
 
 auth.onAuthStateChanged(function (user) {
  if (user) {
- currentUser = { uid: user.uid, name: user.displayName || user.email, email: user.email };
+ currentUser = {
+    uid: user.uid,
+    name: user.displayName || user.email,
+    email: user.email,
+    createdAt: user.metadata.creationTime
+};
  startCloudSync();
  } else {
  let wasLoggedIn = (currentUser !== null);
@@ -192,6 +197,9 @@ function updateDateLabel() {
 }
 
 function renderTasks() {
+ if (currentUser) {
+    renderProfile();
+}
  let list = document.getElementById('taskList');
  list.innerHTML = '';
 
@@ -273,20 +281,28 @@ function showToast(text) {
 }
 
 function toggleTask(id) {
- let task = tasks.find(t => t.id === id);
- if (!task) return;
+    let task = tasks.find(t => t.id === id);
+    if (!task) return;
 
- if (!task.done) {
- showToast('Задача выполнена: ' + task.title);
- }
+    let newDone = !task.done;
 
- if (currentUser) {
- db.collection('tasks').doc(id).update({ done: !task.done }).catch(showCloudError);
- } else {
- task.done = !task.done;
- saveTasks();
- renderTasks();
- }
+    if (newDone) {
+        showToast('Задача выполнена: ' + task.title);
+    }
+
+    if (currentUser) {
+        db.collection('tasks').doc(id).update({
+            done: newDone,
+            completedAt: newDone
+                ? firebase.firestore.FieldValue.serverTimestamp()
+                : null
+        }).catch(showCloudError);
+    } else {
+        task.done = newDone;
+        task.completedAt = newDone ? new Date().toISOString() : null;
+        saveTasks();
+        renderTasks();
+    }
 }
 
 function deleteTask(id) {
@@ -358,6 +374,11 @@ function deleteScheduleClass(dayIndex, classIndex) {
 
 function updateAuthUI() {
  let box = document.getElementById('authContainer');
+ let profileTab = document.getElementById('profileTabBtn');
+
+if (profileTab) {
+    profileTab.style.display = currentUser ? 'block' : 'none';
+}
  if (currentUser) {
  box.innerHTML =
  '<span style="font-weight: bold; font-size: 0.9rem;">' + escapeHTML(currentUser.name) + '</span>' +
@@ -591,5 +612,209 @@ function escapeHTML(str) {
  return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c];
  });
 }
+let progressChart = null;
 
+function renderProfile() {
+    if (!currentUser) return;
+
+    let total = tasks.length;
+    let completed = tasks.filter(t => t.done).length;
+    let pending = total - completed;
+    let progress = total ? Math.round(completed / total * 100) : 0;
+
+    document.getElementById('profileName').textContent = currentUser.name;
+    document.getElementById('profileEmail').textContent = currentUser.email;
+
+    document.getElementById('profileAvatar').textContent =
+        (currentUser.name || 'U').charAt(0).toUpperCase();
+
+    let registrationDate = currentUser.createdAt
+        ? new Date(currentUser.createdAt).toLocaleDateString('ru-RU')
+        : '—';
+
+    document.getElementById('profileCreated').textContent = registrationDate;
+
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statCompleted').textContent = completed;
+    document.getElementById('statPending').textContent = pending;
+    document.getElementById('statProgress').textContent = progress + '%';
+
+    renderProfileChart();
+}
+
+function getCompletedDate(task) {
+    if (!task.completedAt) return null;
+
+    if (task.completedAt.toDate) {
+        return task.completedAt.toDate();
+    }
+
+    let date = new Date(task.completedAt);
+
+    return isNaN(date.getTime()) ? null : date;
+}
+
+function renderProfileChart() {
+    if (!currentUser || typeof Chart === 'undefined') return;
+
+    let period = document.getElementById('statsPeriod').value;
+    let now = new Date();
+
+    let labels = [];
+    let values = [];
+    let keys = [];
+
+    if (period === 'day') {
+        for (let hour = 0; hour < 24; hour++) {
+            labels.push(String(hour).padStart(2, '0') + ':00');
+            keys.push(hour);
+            values.push(0);
+        }
+
+        tasks.forEach(task => {
+            if (!task.done) return;
+
+            let date = getCompletedDate(task);
+
+            if (
+                date &&
+                date.getFullYear() === now.getFullYear() &&
+                date.getMonth() === now.getMonth() &&
+                date.getDate() === now.getDate()
+            ) {
+                values[date.getHours()]++;
+            }
+        });
+    }
+
+    if (period === 'week') {
+        for (let i = 6; i >= 0; i--) {
+            let date = new Date(now);
+            date.setDate(now.getDate() - i);
+
+            let key = date.toDateString();
+
+            keys.push(key);
+            labels.push(date.toLocaleDateString('ru-RU', {
+                weekday: 'short'
+            }));
+            values.push(0);
+        }
+
+        tasks.forEach(task => {
+            if (!task.done) return;
+
+            let date = getCompletedDate(task);
+            if (!date) return;
+
+            let index = keys.indexOf(date.toDateString());
+
+            if (index !== -1) values[index]++;
+        });
+    }
+
+    if (period === 'month') {
+        for (let i = 29; i >= 0; i--) {
+            let date = new Date(now);
+            date.setDate(now.getDate() - i);
+
+            keys.push(date.toDateString());
+            labels.push(date.getDate() + '.' + (date.getMonth() + 1));
+            values.push(0);
+        }
+
+        tasks.forEach(task => {
+            if (!task.done) return;
+
+            let date = getCompletedDate(task);
+            if (!date) return;
+
+            let index = keys.indexOf(date.toDateString());
+
+            if (index !== -1) values[index]++;
+        });
+    }
+
+    if (period === 'year') {
+        for (let i = 11; i >= 0; i--) {
+            let date = new Date(
+                now.getFullYear(),
+                now.getMonth() - i,
+                1
+            );
+
+            keys.push(date.getFullYear() + '-' + date.getMonth());
+
+            labels.push(date.toLocaleDateString('ru-RU', {
+                month: 'short'
+            }));
+
+            values.push(0);
+        }
+
+        tasks.forEach(task => {
+            if (!task.done) return;
+
+            let date = getCompletedDate(task);
+            if (!date) return;
+
+            let key = date.getFullYear() + '-' + date.getMonth();
+            let index = keys.indexOf(key);
+
+            if (index !== -1) values[index]++;
+        });
+    }
+
+    let canvas = document.getElementById('progressChart');
+    if (!canvas) return;
+
+    if (progressChart) {
+        progressChart.destroy();
+    }
+
+    let dark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+    progressChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Выполненные задачи',
+                data: values,
+                backgroundColor: '#0ea5e9',
+                borderRadius: 6,
+                maxBarThickness: 28
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: dark ? '#cbd5e1' : '#475569'
+                    },
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0,
+                        color: dark ? '#cbd5e1' : '#475569'
+                    },
+                    grid: {
+                        color: dark ? '#334155' : '#e2e8f0'
+                    }
+                }
+            }
+        }
+    });
+}
 window.onload = init;
