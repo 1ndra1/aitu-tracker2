@@ -14,6 +14,7 @@ const db = firebase.firestore();
 
 let tasks = JSON.parse(localStorage.getItem('aitu_tasks')) || [];
 let currentUser = null;
+let isMigratingGuestData = false;
 let unsubscribeTasks = null;
 let unsubscribeSchedule = null;
 let currentDate = getToday();
@@ -122,10 +123,10 @@ function startCloudSync() {
  unsubscribeSchedule = userDoc().collection('settings').doc('schedule').onSnapshot(function (doc) {
  if (doc.exists) {
  scheduleData = doc.data().days;
- } else if (!doc.metadata.fromCache) {
- scheduleData = JSON.parse(JSON.stringify(defaultSchedule));
- doc.ref.set({ days: scheduleData });
- }
+ } else if (!doc.metadata.fromCache && !isMigratingGuestData) {
+    scheduleData = JSON.parse(JSON.stringify(defaultSchedule));
+    doc.ref.set({ days: scheduleData });
+}
  renderSchedule();
  }, showCloudError);
 }
@@ -413,57 +414,130 @@ function clearErrors() {
  ['nameError', 'emailError', 'passError'].forEach(id => document.getElementById(id).innerText = '');
 }
 
-function handleAuth(e) {
- e.preventDefault();
- clearErrors();
+async function migrateGuestData(uid) {
+    const guestTasks = JSON.parse(
+        localStorage.getItem('aitu_tasks') || '[]'
+    );
 
- let name = document.getElementById('authName').value.trim();
- let email = document.getElementById('authEmail').value.trim().toLowerCase();
- let password = document.getElementById('authPassword').value;
- let ok = true;
+    const guestSchedule = JSON.parse(
+        localStorage.getItem('aitu_schedule') || 'null'
+    ) || scheduleData;
 
- if (authMode === 'register' && name === '') {
- showError('nameBox', 'nameError', 'Введите имя');
- ok = false;
- }
- if (email.indexOf('@') === -1 || email.indexOf('.') === -1) {
- showError('emailBox', 'emailError', 'Введите правильный email, например student@aitu.edu.kz');
- ok = false;
- }
- if (password.length < 6) {
- showError('passBox', 'passError', 'Пароль должен быть не короче 6 символов');
- ok = false;
- }
- if (!ok) return;
 
- let btn = document.getElementById('authSubmitBtn');
- btn.disabled = true;
+    for (let i = 0; i < guestTasks.length; i += 450) {
+        const batch = db.batch();
+        const chunk = guestTasks.slice(i, i + 450);
 
- let request;
- if (authMode === 'register') {
- request = auth.createUserWithEmailAndPassword(email, password).then(function (cred) {
- return db.collection('users').doc(cred.user.uid).set({
- email: email,
- name: name,
- createdAt: firebase.firestore.FieldValue.serverTimestamp()
- }).then(function () {
- return cred.user.updateProfile({ displayName: name });
- }).then(function () {
- if (currentUser) {
- currentUser.name = name;
- updateAuthUI();
- }
- });
- });
- } else {
- request = auth.signInWithEmailAndPassword(email, password);
- }
+        chunk.forEach((task, index) => {
+            const taskId = task.id || `${i + index}`;
+            
 
- request
- .then(function () { closeModal(); })
- .catch(showAuthError)
- .then(function () { btn.disabled = false; });
+            const safeId = encodeURIComponent(String(taskId));
+            const docId = `guest_${uid}_${safeId}`;
+
+            const taskRef = db.collection('tasks').doc(docId);
+
+            const taskData = { ...task };
+
+            delete taskData.id;
+            delete taskData.user_id;
+            delete taskData.createdAt;
+
+            taskData.user_id = uid;
+            taskData.createdAt =
+                firebase.firestore.FieldValue.serverTimestamp();
+
+            batch.set(taskRef, taskData);
+        });
+
+        await batch.commit();
+    }
+ 
+    await db.collection('users')
+        .doc(uid)
+        .collection('settings')
+        .doc('schedule')
+        .set({
+            days: guestSchedule
+        });
+
+
+    localStorage.removeItem('aitu_tasks');
+    localStorage.removeItem('aitu_schedule');
+
+    showToast('Гостевые данные перенесены в аккаунт!');
 }
+
+
+function handleAuth(e) {
+    e.preventDefault();
+    clearErrors();
+
+    let name = document.getElementById('authName').value.trim();
+    let email = document.getElementById('authEmail').value.trim().toLowerCase();
+    let password = document.getElementById('authPassword').value;
+
+    let ok = true;
+
+    if (authMode === 'register' && name === '') {
+        showError('nameBox', 'nameError', 'Введите имя');
+        ok = false;
+    }
+
+    if (email.indexOf('@') === -1 || email.indexOf('.') === -1) {
+        showError('emailBox', 'emailError',
+            'Введите правильный email, например student@aitu.edu.kz');
+        ok = false;
+    }
+
+    if (password.length < 6) {
+        showError('passBox', 'passError',
+            'Пароль должен быть не короче 6 символов');
+        ok = false;
+    }
+
+    if (!ok) return;
+
+    let btn = document.getElementById('authSubmitBtn');
+    btn.disabled = true;
+
+    let request;
+
+    if (authMode === 'register') {
+        isMigratingGuestData = true;
+
+        request = auth.createUserWithEmailAndPassword(email, password)
+            .then(function (cred) {
+                return db.collection('users').doc(cred.user.uid).set({
+                    email: email,
+                    name: name,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(function () {
+                    return cred.user.updateProfile({
+                        displayName: name
+                    });
+                }).then(function () {
+                    return migrateGuestData(cred.user.uid);
+                });
+            });
+    } else {
+        request = auth.signInWithEmailAndPassword(email, password);
+    }
+
+    request
+        .then(function () {
+            isMigratingGuestData = false;
+            closeModal();
+        })
+        .catch(function (error) {
+            isMigratingGuestData = false;
+            showAuthError(error);
+        })
+        .then(function () {
+            btn.disabled = false;
+        });
+}
+
 
 function showAuthError(error) {
  let code = error.code;
