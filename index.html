@@ -37,6 +37,9 @@
     <button class="tab-btn" id="profileTabBtn"
         style="display:none"
         onclick="switchTab('profile', this)">Профиль</button>
+    <button class="tab-btn" onclick="switchTab('pomodoro', this)">
+    Pomodoro
+</button>
 </nav>
 
   <main>
@@ -101,6 +104,43 @@
         <div class="profile-chart-wrapper">
             <canvas id="progressChart"></canvas>
         </div>
+    </div>
+</section>
+    <section id="tab-pomodoro" class="tab-content panel">
+    <div class="pomodoro-container">
+        <h2>Pomodoro Timer</h2>
+        <p>Сосредоточься на учёбе и делай перерывы вовремя.</p>
+
+        <div class="pomodoro-modes">
+            <button onclick="setPomodoroMode('work')">Работа</button>
+            <button onclick="setPomodoroMode('short')">Короткий отдых</button>
+            <button onclick="setPomodoroMode('long')">Длинный отдых</button>
+        </div>
+
+        <div id="pomodoroTime">25:00</div>
+
+        <div class="pomodoro-controls">
+            <button onclick="startPomodoro()">Старт</button>
+            <button onclick="pausePomodoro()">Пауза</button>
+            <button onclick="resetPomodoro()">Сброс</button>
+        </div>
+
+        <div class="pomodoro-settings">
+            <h3>Настройки времени</h3>
+
+            <label>Работа (минуты)</label>
+            <input id="workDuration" type="number" min="1" max="120" value="25">
+
+            <label>Короткий отдых (минуты)</label>
+            <input id="shortDuration" type="number" min="1" max="60" value="5">
+
+            <label>Длинный отдых (минуты)</label>
+            <input id="longDuration" type="number" min="1" max="60" value="15">
+
+            <button onclick="savePomodoroSettings()">Сохранить настройки</button>
+        </div>
+
+        <p>Завершено рабочих сессий: <strong id="pomodoroSessions">0</strong></p>
     </div>
 </section>
     <section id="tab-tasks" class="tab-content active panel">
