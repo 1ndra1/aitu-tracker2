@@ -31,12 +31,78 @@
     </div>
   </header>
 
-  <nav class="tabs">
+<nav class="tabs">
     <button class="tab-btn active" onclick="switchTab('tasks', this)">Задачи</button>
     <button class="tab-btn" onclick="switchTab('schedule', this)">Расписание</button>
-  </nav>
+    <button class="tab-btn" id="profileTabBtn"
+        style="display:none"
+        onclick="switchTab('profile', this)">Профиль</button>
+</nav>
 
   <main>
+    <section id="tab-profile" class="tab-content panel">
+    <div class="profile-heading">
+        <div>
+            <h2>Мой профиль</h2>
+            <p class="profile-subtitle">Твой учебный прогресс в AITU Tracker</p>
+        </div>
+        <div class="profile-avatar" id="profileAvatar">U</div>
+    </div>
+
+    <div class="profile-user-card">
+        <div>
+            <span class="profile-label">Имя пользователя</span>
+            <h3 id="profileName">Загрузка...</h3>
+        </div>
+        <div>
+            <span class="profile-label">Email</span>
+            <p id="profileEmail">Загрузка...</p>
+        </div>
+        <div>
+            <span class="profile-label">Дата регистрации</span>
+            <p id="profileCreated">—</p>
+        </div>
+    </div>
+
+    <h3 class="profile-section-title">Моя статистика</h3>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-label">Всего задач</span>
+            <strong id="statTotal">0</strong>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Выполнено</span>
+            <strong id="statCompleted">0</strong>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Осталось</span>
+            <strong id="statPending">0</strong>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Прогресс</span>
+            <strong id="statProgress">0%</strong>
+        </div>
+    </div>
+
+    <div class="profile-chart-card">
+        <div class="chart-heading">
+            <div>
+                <h3>Прогресс выполнения</h3>
+                <p class="profile-subtitle">Количество выполненных задач</p>
+            </div>
+            <select id="statsPeriod" onchange="renderProfileChart()">
+                <option value="day">День</option>
+                <option value="week" selected>Неделя</option>
+                <option value="month">Месяц</option>
+                <option value="year">Год</option>
+            </select>
+        </div>
+        <div class="profile-chart-wrapper">
+            <canvas id="progressChart"></canvas>
+        </div>
+    </div>
+</section>
     <section id="tab-tasks" class="tab-content active panel">
       <div class="date-nav">
         <button class="btn btn-outline" onclick="changeDate(-1)">&larr; Пред.</button>
@@ -159,6 +225,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
