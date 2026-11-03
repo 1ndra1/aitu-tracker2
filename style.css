@@ -160,7 +160,6 @@ h3 { font-size: 1rem; margin-bottom: .75rem; }
   header { padding: .75rem 1rem; }
   .date-nav .btn { padding: .5rem .6rem; }
 }
-/* PROFILE */
 
 .profile-heading {
     display: flex;
@@ -281,7 +280,7 @@ h3 { font-size: 1rem; margin-bottom: .75rem; }
     }
 }
 
-/* POMODORO */
+
 
 .pomodoro-container {
     max-width: 560px;
@@ -468,12 +467,11 @@ h3 { font-size: 1rem; margin-bottom: .75rem; }
     .pomodoro-modes { border-radius: 16px; }
 }
 
-/* ВИДЕО В "КАК ЭТО РАБОТАЕТ" */
 
 .help-video-wrapper video {
     display: block;
     width: 100%;
-    max-width: 640px;
+    max-width: 100%;
     height: auto;
     margin: 0 auto;
     border-radius: 12px;
