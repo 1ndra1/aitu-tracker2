@@ -580,3 +580,13 @@ h3 { font-size: 1rem; margin-bottom: .75rem; }
 #statsPeriod + .cselect-btn { background: var(--card); }
 .chart-heading .cselect { flex: 0 0 140px; }
 .schedule-form .cselect { flex: 1 1 130px; }
+.task-form .time-picker {
+  flex: 1 1 100%;          /* время на своей строке */
+}
+.task-form .time-picker .cselect {
+  flex: 1 1 0;             /* ЧЧ и ММ делят ширину поровну */
+}
+.task-form > .btn-primary {
+  flex: 1 1 100%;          /* кнопка на всю ширину, на отдельной строке */
+  min-height: 48px;        /* удобно нажимать пальцем */
+}
