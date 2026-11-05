@@ -874,13 +874,13 @@ function updatePomodoroDisplay() {
     document.getElementById('pomodoroLabel').textContent =
         modeNames[pomodoroMode];
 
-    // кольцо: чем меньше времени осталось, тем меньше заполнено
+
     const total = pomodoroDurations[pomodoroMode] * 60;
     const ring = document.getElementById('pomodoroRing');
     ring.style.strokeDasharray = RING_LENGTH;
     ring.style.strokeDashoffset = RING_LENGTH * (1 - pomodoroRemaining / total);
 
-    // подсветка активного режима
+
     document.querySelectorAll('.pomodoro-modes button').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === pomodoroMode);
     });
@@ -994,7 +994,6 @@ function initPomodoro() {
 
 initPomodoro();
 
-// КРАСИВЫЕ СПИСКИ (замена обычных select)
 
 function enhanceSelect(select) {
     let wrap = select._wrap;
@@ -1030,7 +1029,6 @@ function enhanceSelect(select) {
         select._list = list;
     }
 
-    // заново строим список вариантов
     select._list.innerHTML = '';
     Array.from(select.options).forEach(function (opt) {
         if (opt.disabled) return;
