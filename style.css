@@ -646,3 +646,28 @@ h3 { font-size: 1rem; margin-bottom: .75rem; }
 .chip-tomorrow { background: rgba(14,165,233,.15); color: var(--heading); }
 .chip-overdue { background: rgba(239,68,68,.15); color: var(--danger); }
 .notif-item .chip { font-size: .75rem; padding: .1rem .6rem; }
+/* Вкладки: прокрутка пальцем, ничего не вылезает */
+.tabs {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex: 1 0 auto;        /* на большом экране растягиваются, на узком не сжимаются */
+  white-space: nowrap;
+  padding: .7rem 1rem;
+}
+
+/* Центрирование на телефоне */
+@media (max-width: 480px) {
+  header { justify-content: center; text-align: center; }
+  .header-actions, #authContainer { justify-content: center; flex-wrap: wrap; }
+  .date-nav { align-items: center; }
+  .reminder-chips { justify-content: center; }
+}
+
+/* Страница не должна двигаться вбок */
+html, body { max-width: 100%; overflow-x: hidden; }
