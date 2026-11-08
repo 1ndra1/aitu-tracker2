@@ -1418,5 +1418,9 @@ function initCustomSelects() {
         if (e.key === 'Escape') closeAllSelects();
     });
 }
-
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  });
+});
 window.onload = init;
