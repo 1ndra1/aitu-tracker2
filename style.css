@@ -661,13 +661,22 @@ h3 { font-size: 1rem; margin-bottom: .75rem; }
   padding: .7rem 1rem;
 }
 
-/* Центрирование на телефоне */
+/* Шапка на телефоне: логотип слева, всё в одну строку */
 @media (max-width: 480px) {
-  header { justify-content: center; text-align: center; }
-  .header-actions, #authContainer { justify-content: center; flex-wrap: wrap; }
-  .date-nav { align-items: center; }
-  .reminder-chips { justify-content: center; }
+  header {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: .5rem;
+    padding: .6rem .75rem;
+  }
+  .app-logo { height: 34px; }
+  .header-actions, #authContainer { gap: .4rem; flex-wrap: nowrap; }
+  .theme-toggle { width: 38px; height: 38px; flex-shrink: 0; }
+  #authContainer .btn { padding: .45rem .7rem; font-size: .85rem; }
+  #authContainer span {          /* имя пользователя */
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
-
-/* Страница не должна двигаться вбок */
-html, body { max-width: 100%; overflow-x: hidden; }
